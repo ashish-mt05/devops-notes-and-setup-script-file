@@ -29,8 +29,6 @@ WORKER NODES: takes commands from ansible server and works according to it
 PLAYBOOK: conatins the code which is used to perform action.
 INVENTORY: conatains info about worker nodes and group.
 
-
-
 SETUP:
 CREATE 5 SERVERS (1=ANSIBLE, 2=DEV, 2=TEST)
 ALL SERVERS:
@@ -48,7 +46,6 @@ vim /etc/ssh/sshd_config  (38 uncomment, 63 no=yes)
 
 systemctl restart sshd
 systemctl status sshd
-
 
 ANSIBLE SERVER(install ansible and python on ansible server):
 amazon-linux-extras install ansible2 -y
