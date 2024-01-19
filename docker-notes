@@ -696,9 +696,9 @@ docker swarm join-token manager : to regenerate the token(if you forgot the toke
 
 
 Note: 
-=>To join the manager node on cluster worker need to use previous token.
+=>To join the manager node on cluster, worker need to use previous token.
 =>we can't delete running worker node directly
-=>if you want to remove then first we need to stop and then delete it.
+=>if you want then first we need to stop and then delete it.
 
 
 HISTORY:
