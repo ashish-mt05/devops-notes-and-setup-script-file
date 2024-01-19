@@ -27,7 +27,10 @@ ARCHITECTURE:
 ANSIBLE SERVER: used to communicate with worker nodes and install pkgs, deployment
 WORKER NODES: takes commands from ansible server and works according to it
 PLAYBOOK: conatins the code which is used to perform action.
-INVENTORY: conatains info about worker nodes and group.
+INVENTORY: conatains info about worker nodes and group(Ip address of worker node or hostname etc). 
+'/etc/ansible/hosts' this is location where we store ip of workers node.
+
+
 
 SETUP:
 CREATE 5 SERVERS (1=ANSIBLE, 2=DEV, 2=TEST)
@@ -46,6 +49,7 @@ vim /etc/ssh/sshd_config  (38 uncomment, 63 no=yes)
 
 systemctl restart sshd
 systemctl status sshd
+
 
 ANSIBLE SERVER(install ansible and python on ansible server):
 amazon-linux-extras install ansible2 -y
@@ -85,6 +89,8 @@ these commands will be over rided.
 
 #using ansbile, if we run any cammand on ansible server using 'ansible all -a "command"' then it will execute on all worker server.
 ansible all -a "yum install git -y"
+#uninstall git and there depedent pkg(git* means git and there dependent pkg)
+ansible all -a "yum remove git* -y"
 ansible all -a "yum install maven -y"
 ansible all -a "mvn --version"
 ansible all -a "touch file1"
@@ -136,28 +142,38 @@ ANSIBLE MODULES:
 modules work on key-value pair.
 modules used to do the work which we want.
 depend on the work module changes.
-
+Ex:
 NAME: RAHAM
 COURSE: DEVOPS
 FEE: 8k
 
-color pattren:
+color pattren to identify pkg is installed or not:
 
 YELLOW	: SUCCESSFUL
 RED	: FAILED
 GREEN	: ALREADY DONE
 BLUE	: SKIPPED
 
-ansible all -a "yum install git -y"
-ansible all -m yum -a "name=git state=present"
+
+#Here -m represent module and here we are young yum module
+# present means install
+# absent means uninstall 
+# latest means update
 ansible all -m yum -a "name=docker state=present"  (present=install)
-ansible all -m yum -a "name=docker state=present"  (absent=uninstall)
+ansible all -m yum -a "name=docker state=absent"  (absent=uninstall)
 ansible all -m yum -a "name=docker state=latest"   (latest=update)
+ansible all -m yum -a "name=git state=present"
+#started httpd
 ansible all -m service -a "name=httpd state=started"
+#stopped httpd
 ansible all -m service -a "name=httpd state=stopped"
+#create user rajinikanth.
 ansible all -m user -a "name=rajinikanth state=present"
+#dlete user rajinikanth.
 ansible all -m user -a "name=rajinikanth state=absent"
+#copy app.yml to all worker node in root directory.
 ansible all -m copy -a "src=app.yml dest=/root"
+#listing in root.
 ansible all -a "ls /root"
 
 PLAYBOOKS:
@@ -178,10 +194,10 @@ vim raham.yml
 
 
 ---
-- hosts: all
+- hosts: all  // all means all worker
   tasks:
-    - name: install httpd
-      yum: name=httpd state=present
+    - name: install httpd  // this name of operation
+      yum: name=httpd state=present //this is the main command
 
     - name: start httpd
       service: name=httpd state=started
@@ -190,7 +206,7 @@ vim raham.yml
       user: name=revi state=present
 ...
 
-
+#command to execute playbook
 ansible-playbook raham.yml
 
 
@@ -227,9 +243,9 @@ used to execute or skip a specific task
       user: name=revi state=present
       tags: d
 
-SINGLE TAG: ansible-playbook raham.yml --tags c
-MULTI TAGS: ansible-playbook raham.yml --tags a,b
-SKIP TAGS: ansible-playbook raham.yml --skip-tags "c"
+SINGLE TAG: ansible-playbook raham.yml --tags c   //here '--tags c' means we are executing only c tag command.
+MULTI TAGS: ansible-playbook raham.yml --tags a,b //here '--tags a,b' means we are executing only a and b tag command. MULTI TAGS means executing multiple tags
+SKIP TAGS: ansible-playbook raham.yml --skip-tags "c" //here '--skip-tags "c"' means we skipping to execute c tag command(install maven).
 MULTI SKIP TAGS: SKIP TAGS: ansible-playbook raham.yml --skip-tags "b,c"
 
 
@@ -280,6 +296,13 @@ HISTORY:
    85  history
 
 =====================================================
+Without using module we can write playbook.
+We can use linux command to write playbook.
+Using :
+1. shell
+2. command
+3. raw
+
 SHELL VS COMMAND VS RAW
 
 - hosts: all
@@ -293,9 +316,11 @@ SHELL VS COMMAND VS RAW
     - name: install docker
       raw: yum install docker -y
 
-RAW >> COMMAND >> SHELL
+RAW(more powerful then Command) >> COMMAND(more powerful then Shell) >> SHELL
+
 
 sed -i 's/install/remove/g' raham.yml
+=> sed used to replace content
 
 - hosts: all
   tasks:
@@ -313,7 +338,27 @@ ansible-playbook raham.yml
 VARS:
 
 STATIC VARS: vars which will define inside playbook.
+Ex:
+- hosts: all
+  vars:
+    a: git
+    b: maven
+    c: docker
+  tasks:
+    - name: install git
+      yum: name={{a}} state=present
+
+    - name: install maven
+      yum: name={{b}} state=present
+
+    - name: install docker
+      yum: name={{c}} state=present
+here using vars we can pass static variable.
+
 DYNAMIC VARS: vars which are not define inside playbook.
+we can pass dynamc variable while executing playbook.
+Ex: ansible-playbook raham.yml --extra-vars "d=tree"
+here we are passing d variable.
 
 - hosts: all
   vars:
@@ -395,14 +440,15 @@ ansible all -a "yum remove git* maven* docker* tree* -y"
       yum: name={{e}} state=present
 
 
- single var: ansible-playbook raham.yml --extra-vars "d=tree"
+ single dynamic var: ansible-playbook raham.yml --extra-vars "d=tree"
+ multi dynamic var: ansible-playbook raham.yml --extra-vars "d=tree e=java-1.8.0-openjdk"
+
+ sed -i "s/present/absent/g" raham.yml
  multi var: ansible-playbook raham.yml --extra-vars "d=tree e=java-1.8.0-openjdk"
 
-sed -i "s/present/absent/g" raham.yml
- multi var: ansible-playbook raham.yml --extra-vars "d=tree e=java-1.8.0-openjdk"
+LOOPS: using loop we can remove lot of code.
 
-LOOPS:
-
+#install multple pkg.
 - hosts: all
   tasks:
     - name: install pkgs
@@ -414,7 +460,7 @@ LOOPS:
         - htppd
         - tree
 
-
+#create multiple users :
 - hosts: all
   tasks:
     - name: create users
@@ -433,7 +479,9 @@ LOOPS:
 
 
 TROUBLESHOOTING:
+#check cpu of all workers node
 ansible all -m setup | grep -i cpus
+#check memory of all workers node
 ansible all -m setup | grep -i mem
 
 HISTORY:
@@ -509,7 +557,32 @@ HISTORY:
   156  ansible all -m setup | grep -i mem
   157  history
 =============================================================================================================
+CLuster : It is a group of homogenuos or hetrogenuos node or server.
 
+
+- hosts: all
+  tasks:
+    - name: install git on redhat
+      yum: name=git state=absent
+
+    - name: install git ob ubuntu
+      apt: name=git state=present
+
+so here one of pkg installation got failed becouse hetroginty of OS(yum work on redhat and apt work on ubuntu).
+so to remove above porblem we need to add conditon
+
+- hosts: all
+  tasks:
+    - name: install git on redhat
+      yum: name=git state=absent
+      when : ansible_os_family == 'RedHat'
+    - name: install git on ubuntu
+      apt: name=git state=present
+      when : ansible_os_family == 'Debian'
+
+so here git installation done when conditon got met
+
+===================================================================================================
 HANDLERS: here one task depends on another task.
 when task-1 is executed it will call task-2 to perform the action.
 ex: if we want to restart httpd we need to install it
@@ -533,7 +606,9 @@ it is used to encrypt the files, playbooks ----
 Technique: AES256 (USED BY FACEBOOK)
 vault will store our data very safely and securely.
 if we want to access any data which is in the vault we need to give a password.
+
 Note: we can restrict the users to access the playbook aslo.
+Ex: ansible-vault create raham.yml
 
 ansible-vault create creds1.txt		: to create a vault
 ansible-vault edit creds1.txt		: to edit a vault
@@ -571,16 +646,42 @@ python: pip
 ANSIBLE SETUP MODULES: Used to print the complete info of worker nodes.
 
 ROLES: 
+
 used to divide the playbook into directory structures.
 we can organize the playbooks.
 we can encapsulate the data.
 we can reduce the playbook length.
 
-mkdir playbooks
-cd playbooks
+#install tree to view structure in tree format
 yum install tree -y
 
+step1 : mkdir playbooks and cd playbooks
+step 2: mkdir -p roles/one/tasks
 
+    vim roles/one/tasks/main.yml
+      - name: installing maven
+        yum: name=maven state=present
+
+    vim roles/raham/tasks/main.yml
+      - name: create user
+        user: name=srikanth state=present
+
+    vim roles/file/tasks/main.yml
+      - name: create a file
+        shell: touch file22
+
+step3: create master.yml and define role inside file:
+    vim master.yml
+
+     - hosts: all
+       roles:
+         - file
+         - one
+         - raham
+
+step4: ansible-playbook master.yml
+
+> ansible all -a "yum tree"
 .
 ├── master.yml
 └── roles
@@ -594,31 +695,7 @@ yum install tree -y
         └── tasks
             └── main.yml
 
-
-mkdir -p roles/one/tasks
-vim roles/one/tasks/main.yml
-
-- name: installing maven
-  yum: name=maven state=present
-
-vim roles/raham/tasks/main.yml
-- name: create user
-  user: name=srikanth state=present
-
-vim roles/file/tasks/main.yml
-- name: create a file
-  shell: touch file22
-
-vim master.yml
-
-- hosts: all
-  roles:
-    - one
-    - raham
-    - file
-
-ansible-playbook master.yml
-
+=================================================================== 
 ANSIBLE-GALAXY: used to store playbooks like code on github.
 
 ansible-galaxy search java
@@ -719,6 +796,10 @@ HISTORY:
 
 ===============================================
 
+Debug: used to print the msgs/customize ops
+
+Ex: print below data of all noeds:
+
 ansible_hostname
 ansible_memfree_mb
 ansible_memtotal_mb
@@ -726,8 +807,7 @@ ansible_os_family
 ansible_pkg_mgr
 ansible_processor_vcpus
 
-
-Debug: used to print the msgs/customize ops
+vim raham.yml
 
 - hosts: all
   tasks:
@@ -739,16 +819,22 @@ JINJA2 TEMPLATE: used to get the customized op, here its a text file which can e
 
 LOOKUPS: this module used to get data from files, db and key-values
 
+creds.txt
+username=ashish
+
+
+raham.yml :
 
 - hosts: dev
   vars:
-    a: "{{lookup('file', '/root/creds.txt') }}"
+    a: "{{lookup('file', '/root/creds.txt') }}"  //here a fetched creds.txt data.
   tasks:
     - debug:
         msg: "hai my user name is {{a}}"
 
-cat creds.txt
-user=raham
+run playbook:
+ansible-playbook raham.yml
+
 
 STRATAGIES:
 
