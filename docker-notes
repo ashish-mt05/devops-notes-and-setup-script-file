@@ -50,10 +50,13 @@ DOCKER REGISTRY: it manages all the  docker images on internet.
 
 INSTALLATION:
 yum install docker -y
+#when we installed docker then deamon is not started bydefault we need to start docker service.
 systemctl start docker
 systemctl status docker
 
-
+#search docker image.
+docker search amazonlinux
+		
 docker pull amazonlinux		: to downlaod image
 docker run -it --name cont1 amazonlinux : to create conatiner
 
@@ -64,9 +67,9 @@ touch file1
 ctrl p q
 
 docker images		: to list images
-docker start cont1	: to start cont1
-docker stop cont1	: to stop cont1
-docker kill cont1	: to stop immedieatly cont1
+docker start <conatinerName>: to start cont1
+docker stop <conatinerName>: to stop cont1
+docker kill <conatinerName>: to stop immedieatly cont1
 docker ps 		: to see running containers
 docker ps -a		: to see all containers
 
@@ -124,34 +127,37 @@ we can reuse the docker file for multiple times.
 in Dockerfile D will be Capital always.
 Components inside the Dockerfile also Capital.
 
-Dockerfile -- > Image -- > Container -- > 
+Dockerfile -- > Image -- > Container -- > Image -- > repeat
 
 
 COMPONENTS:
 FROM		: to base image (gives os)
-RUN		: to execute linux commands (image creation)
-CMD		: to execute linux commands (container creation)
+RUN		: to execute linux commands (FROM executed while image creation(when we exectue 'docker build' command to create image from Dockerfile))
+CMD		: to execute linux commands ((CMD executed while container creation(when we execute 'docker run' command  from image.))
 ENTRYPOINT	: high priority than cmd
-COPY 		: to copy local files to conatainer
-ADD 		: to copy Intenet files to conatainer
-WORKDIR		: to go desired folder
+COPY 		: to copy local(local system) files to conatainer
+ADD 		: to copy Intenet files(file from browser) to conatainer
+WORKDIR		: to go desired folder(when we create container then bydefault location is root directory, but if we want to change bydefault to any other directory then we need to use 'WORKDIR' in dockerfile)
 LABEL 		: to attach our tags/labels
-ENV		: variables which run inside conatiner (image)
+ENV		: variables which run inside conatiner (image(we need to define ENV inside Dockerfile))
 ARGS		: variables which run outside conatiner(containers)
 VOLUME		: used to create volume for conatiner
 EXPOSE		: used to give port number
 
 EX: -1
-
+vim Dockerfile:
 FROM ubuntu
 RUN apt update -y
 RUN apt install git maven tree apache2 -y
 
-Build : docker build -t netflix:v1 .
-cont: docker run -it --name cont3 netflix:v1
+Build Dockerfile to create imgae: docker build -t <image_name>:<version>
+   Ex: docker build -t netflix:v1 .
+create container from image : docker run -it --name <container_name> image_name_with_version
+   Ex: docker run -it --name cont3 netflix:v1
+           here image name is 'netflix:v1' which we have created from Dockerfile.
+           we can give any container_name.
 
-
-ex-2:
+ex-2: CMD Example:
 FROM ubuntu
 RUN apt update -y
 RUN apt install git maven tree apache2 -y
@@ -160,7 +166,7 @@ CMD apt install default-jre -y
 Build : docker build -t netflix:v2 .
 cont: docker run -it --name cont4 netflix:v2
 
-EX-3:
+EX-3: COPY and ADD Example:
 
 FROM ubuntu
 RUN apt update -y
@@ -168,7 +174,10 @@ RUN apt install git maven tree apache2 -y
 COPY index.html /tmp
 ADD https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz /tmp
 
-EX-4:
+Note: here 'index.html' is local file which is present in our system.
+'apache-maven-3.8.8-bin.tar.gz' this file present in cloud(remote)
+
+EX-4: WORKDIR  and LABEL Example:
 
 FROM ubuntu
 RUN apt update -y
@@ -178,8 +187,14 @@ ADD https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin
 WORKDIR /tmp
 LABEL author rahamshaik
 
+Note: when we create container using 'docker run' command then bydefault root directory is opened, 
+so if we want to opened bydefault any other directory apart from root then we need to use 'WORKDIR'.
 
-docker inspect cont7 
+In above case when we execute 'docker run' command then bydefault tmp directory will open.
+
+#give details of container
+docker inspect <container_name>
+#check auther name.
 docker inspect cont7 | grep -i author
 
 
@@ -216,11 +231,34 @@ EXPOSE 8080
 
 COMMANDS:
 docker ps -a -q		: to list conatier ids
-docker stop $(docker ps -a -q) : to stop all conatiners
+docker stop $(docker ps -a -q) : to stop all conatiners[make $(docker ps -a -q) as variable and use with other command, so using $(command) we can make command as variable]
 docker rm $(docker ps -a -q) : to delete all conatiners
 
 docker images -q	: to print image ids
 docker rmi -f $(docker images -q) : to delete all images
+
+HOW TO create COMMAND AS VARIABLE :
+
+Syntax : $(command)
+
+Ex: $(docker ps -a -q) this is act as variable.
+
+Use to variable:
+variable as command we can use with some other command.
+
+Ex. delete all container, so for this we need to follow some steps(directoly we can't delete all conatiner)
+
+1. list out all container id by below command :
+  > docker ps -a -q
+2. convert above cammand in variable using $(docker ps -a -q)
+3. stop all running container($(docker ps -a -q) will return all container id) so we can stop all conatiner with container id.
+  > docker stop $(docker ps -a -q)
+4. delete all conatiner:
+  > docker rm $(docker ps -a -q)
+
+Like same we can delete all image also:
+> docker images -q
+> docker rmi -f $(docker images -q)
 
 HISTORY: 1  yum install docker -y
     2  service docker start
@@ -276,14 +314,17 @@ HISTORY: 1  yum install docker -y
 ==============================================================================================================
 
 VOLUMES:
-in docker, we use volumes to store the data.
-volume is nothing but a folder inside a container.
-we can share a volume from one container to another.
-the volume contains the files which have data.
-we can attach the single volume to multiple containers.
-but at a time we can attach only one volume to one container.
-volumes are decoupled (loosely attached)
-if we delete the container volume will not be deleted.
+=> in docker, we use volumes to store the data.
+=> volume is nothing but a folder inside a container.
+=> we can share a volume from one container to another.
+=> the volume contains the files which have data.
+=> we can attach the single volume to multiple containers, but at a time we can attach only one volume to one container.
+=> volumes are decoupled (loosely attached)
+=> if we delete the container volume will not be deleted.
+=> in attaced volume of contanier1 if we add any thing then this will also reflect in container2 volume(if same volume is attached to both container)
+ and vice-versa.
+=> if we copy anything in volume and if same volume is attached to any container then all data visible from container volume.
+=> we can send our local data to container(copy local data to container volume then data will avaible to container volume).
 
 
 METHOD-1:
@@ -295,10 +336,15 @@ VOLUME ["/volume1"]
 
 docker build -t netflix:v1 .
 docker run -it --name cont1 netflix:v1
+//goto inside volume
 cd volume1
+//create 10 file
 touch file{1..10}
+//exit from container
 ctrl p q
 
+//while creating container, assign volume from container to conatiner2 using --volumes-from cont1.
+//while assigning volume we need to give --privileged=true.
 docker run -it --name cont2 --volumes-from cont1 --privileged=true ubuntu
 cd volume1
 ll
@@ -316,28 +362,40 @@ cd volume2
 ll
 ctrl p q
 
-3. VOLUME MOUNTING:
+3. VOLUME MOUNTING: means create volume in local and attached to any container.
 
 volume commands:
+syntax : docker volume create <volume_name>
+Ex:  
+//create volume
 docker volume create volume3
+//list out all volume
 docker volume ls
+//inspect volume
 docker volume inspect volume3
 
+//goto volume 3
 cd /var/lib/docker/volumes/volume3/_data
 touch python{1..10}
 ll
+//mount volume to container:
 docker run -it --name cont5 --mount source=volume3,destination=/volume3 ubuntu
+
+here don't put any space between 'source=volume3,destination=/volume3', if you put then you will get error.
 
 
 4. MOVING FILES FROM LOCAL TO CONTAINER:
 
-create a connection and attach a volume for it
+  1. create a container and attach a volume to it
 
-touch raham{1..10}
-docker inspect cont6
-docker volume inspect volume4
-cp * /var/lib/docker/volumes/volume4/_data
-
+  2. then create somae data in local system.
+     > touch raham{1..10}
+  3. find volume attached to container
+     > docker inspect cont6 (from here alos we can find location of volume)
+  4. find the volume location of volume.
+     > docker volume inspect volume4
+  4. copy local data to container volume.
+     > cp * /var/lib/docker/volumes/volume4/_data
 
 5.
 touch raham{1..10}
