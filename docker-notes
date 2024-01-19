@@ -325,6 +325,10 @@ VOLUMES:
  and vice-versa.
 => if we copy anything in volume and if same volume is attached to any container then all data visible from container volume.
 => we can send our local data to container(copy local data to container volume then data will avaible to container volume).
+=> to create volume name must put "/" before volume name.
+   Ex: FROM ubuntu
+       VOLUME ["/volume1"]
+  but when we create volume using "docker volume create volume3" then not required.
 
 
 METHOD-1:
@@ -350,7 +354,7 @@ cd volume1
 ll
 
 
-2. CLI:
+METHOD-2. CLI:
 
 docker run -it --name cont3 -v /volume2 ubuntu
 cd volume2
@@ -362,7 +366,7 @@ cd volume2
 ll
 ctrl p q
 
-3. VOLUME MOUNTING: means create volume in local and attached to any container.
+METHOD-3. VOLUME MOUNTING: means create volume in local and attached to any container.
 
 volume commands:
 syntax : docker volume create <volume_name>
@@ -377,15 +381,16 @@ docker volume inspect volume3
 //goto volume 3
 cd /var/lib/docker/volumes/volume3/_data
 touch python{1..10}
-ll
 //mount volume to container:
 docker run -it --name cont5 --mount source=volume3,destination=/volume3 ubuntu
 
 here don't put any space between 'source=volume3,destination=/volume3', if you put then you will get error.
 
 
-4. MOVING FILES FROM LOCAL TO CONTAINER:
+METHOD-4. MOVING FILES FROM LOCAL TO CONTAINER:
 
+ a) 1st Way : 
+  
   1. create a container and attach a volume to it
 
   2. then create somae data in local system.
@@ -397,14 +402,24 @@ here don't put any space between 'source=volume3,destination=/volume3', if you p
   4. copy local data to container volume.
      > cp * /var/lib/docker/volumes/volume4/_data
 
-5.
-touch raham{1..10}
-cp * /home/ec2-user
-docker run -it --name cont12 -v /home/ec2-user:/abcd ubuntu
+ b) 2nd Way:
+  
+  //create file in 
+  touch raham{1..10}
+  //copy file from current directory to /home/ec2-user
+  cp * /home/ec2-user
+  //from copy data from /home/ec2-user to abcd volume.
+  docker run -it --name cont12 -v /home/ec2-user:/abcd ubuntu
+
+  here /home/ec2-user:/abcd
+  /home/ec2-user => this is location where all file is there, which we need to copy to container volume.
+  /abcd => volume name.
+
+==================================================================================================
 
 SYSTEM COMMANDS:
-docker system df	: show docker components resource utilization
-docker system df -v	: show docker components resource utilization individually
+docker system df	: show docker components resource utilization(show all images, container, volumes and cache)
+docker system df -v	: show docker components resource utilization individually(details info about images, container, volumes)
 docker system prune	: to remove unused docker components
 
 JENKINS SETUP:
@@ -522,7 +537,7 @@ docker build -t recharge:v1 .
 docker run -itd --name recharge -p 84:80 recharge:v1
 public-ip:84
 
-
+=================================================================================================
 
 DOCKER COMPOSE:
 its a tool used to launch multiple conatiners.
@@ -536,8 +551,10 @@ used to manage multiple servivces with help of a file.
 
 SETUP:
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+//when we download any file from internet then must move that file in bin folder, becouse all command is there in bin folder.
 ls /usr/local/bin/
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+//give executable permission to that file to work as command.
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose version
 
@@ -567,7 +584,7 @@ Note: remove all the conatiners
 
 Commands:
 docker-compose up -d	: to run all services
-docker-compose down	: to remove all services
+docker-compose down	: to stop and remove all services
 docker-compose stop	: to stop all services
 docker-compose kill	: to kill all services
 docker-compose rm	: to remove all services which is on stopped state
@@ -599,10 +616,25 @@ ACCOUNT:
 build a docker image with doker file.
 docker login: username and password
 
-docker tag image:v1 username/reponame
-docker push username/reponame
+Steps to push image into dockerhub:
 
+1. login to dockerhub using:
 
+  > docker login
+     enter username and password.
+
+3. after login goto dockerhub repository and create one reposiroty. once you created reposiroty then you will get in "dockerhub_username/<docker_hub_repo_name>" this format
+   Ex: akumar.mt05/movies
+   here 'akumar.mt05' is dockerhub username and 'movies' is repository name
+
+4. Then tagged image to dockerhub reposiroty.
+
+  > docker tag <image_name>:<version> dockerhub_username/<docker_hub_repo_name>
+
+   Ex: docker tag movie:v1 akumar.mt05/movies
+
+5. push created tagged repository into dockerhub:
+  > docker push dockerhub_username/<docker_hub_repo_name>
 
 DOCKER SWARM:
 
