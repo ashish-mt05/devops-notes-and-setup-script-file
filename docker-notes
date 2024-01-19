@@ -650,17 +650,22 @@ worker nodes will take the container and manage them.
 manager node communicates with worker node by using token.
 
 SETUP:
-1. create 3 servers (1=manager 2=worker) (all traffic is must)
-yum install docker -y
-systemctl start docker
-systemctl status docker
+1. create 3 servers (1=manager 2=worker) (enable all traffic to communicate for all server)
+  #install docker on all three server
+  > yum install docker -y
+  #start docker
+  > systemctl start docker
+  > systemctl status docker
 
-2. set the hostnames:
-hostnamectl set-hostname manager/worker-1/worker-2
+2. set the hostnames all server:
+   > hostnamectl set-hostname manager/worker-1/worker-2
 
-3. generate and copy token:
-manager node: docker swarm init
-copy the token to all worker nodes
+3. generate token from manager node:
+  > docker swarm init
+   o/p : docker swarm join --token SWMTKN-1-63acssa9evttu0uxchb671sntfvq13oh9mmv281o3wvh7jpayw-0wvkd2iiiyfle9ibxozk5l3pr 192.168.65.4:2377
+         
+    copy above o/p and paste to all worker node, once you copied then all workers node connected to manager node.
+
 
 SERVICES:
 its a way of exposing the application in docker.
@@ -668,6 +673,11 @@ with services we can create multiple copies of same container.
 with services we can distribute the containers to all servers.
 
 docker service create --name movies --replicas=3 --publish 81:80 jayaprakashsairam05/movies:latest
+
+here '--name movies' means name of service is movies, '--replicas=3'(for each server one container got created)
+'--publish' means published one one conatiner to every server.
+
+=> after ruiing above command, if we do 'docker ps -a' on all server then we will get conatiner got created on every node.
 
 docker service ls		: to list services
 docker service ps train		: to list containers for train
@@ -677,17 +687,18 @@ docker service scale train=6	: to scale the services
 docker service rollback train	: to go back to previous state
 docker service rm train		: to delete the train services
 
-SELF HEALING: automatically recreates container itself.
+SELF HEALING: automatically recreates container itself(once we deleted any container then one more container got created).
 
 CLUSTER LEVEL ACTIVITES:
-docker swarm leave(worker node)	: to down the woker node
-docker node rm id (manager node): to remove the node permenanetly
-docker swarm join-token manager : to regenerate the token
+docker swarm leave(from worker node)	: to down the woker node
+docker node rm id (from manager node): to remove the node permenanetly
+docker swarm join-token manager : to regenerate the token(if you forgot the token then using this we can regenerate token)
 
 
-Note: to join the node on cluster use the previous token
-we can delete running worker node directly
-we need to stop and then delete it
+Note: 
+=>To join the manager node on cluster worker need to use previous token.
+=>we can't delete running worker node directly
+=>if you want to remove then first we need to stop and then delete it.
 
 
 HISTORY:
@@ -709,11 +720,11 @@ HISTORY:
    16  docker service ps train
    17  docker service inspect train
    18  docker service ls
-   19  docker service scale train=10
+   19  docker service scale train=10  ==> scale command
    20  docker service ls
    21  docker service ps train
    22  docker service scale train=6
-   23  docker service rollback train
+   23  docker service rollback train(current state to previous state)
    24  docker service rm train
    25  docker service ls
    26  docker ps -a
