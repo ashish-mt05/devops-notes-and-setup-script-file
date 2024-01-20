@@ -1,0 +1,262 @@
+Steps to install minikube :
+
+1. open power cell and run below cammand :
+  we can download minikube.exe file file two ways :
+  a) using url :
+    New-Item -Path 'c:\' -Name 'minikube' -ItemType Directory -Force
+     Invoke-WebRequest -OutFile 'c:\minikube\minikube.exe' -Uri 'https://github.com/kubernetes/minikube/releases/latest/download/minikube-windows-amd64.exe' -UseBasicParsing
+
+     Note : when you run above cammond then it will create one minikube folder inside c drive and automatically create minikube-windows-amd64.exe with minikube.exe name.
+
+  b) direct downlaod kubectl and paste in above folder.
+
+   curl.exe -LO "https://dl.k8s.io/release/v1.26.0/bin/windows/amd64/kubectl.exe"
+   
+3. Set path of downloaded minikube.exe in env variable.
+    we can set path two ways :
+	
+	a) $oldPath = [Environment]::GetEnvironmentVariable('Path', [EnvironmentVariableTarget]::Machine)
+    if ($oldPath.Split(';') -inotcontains 'path of your minikube.exe'){
+    [Environment]::SetEnvironmentVariable('Path', $('{0}; path of your minikube.exe' -f $oldPath), [EnvironmentVariableTarget]::Machine)}
+	
+	b) directly from environment properties.
+
+4. to start minikube it requires docker or VMBox etc, so in case of docker, first you need to start docker 
+
+  > start docker.
+
+5. run below cammand :
+
+    1. start minikube with docker.
+	
+	 > minikube start --driver=docker
+	 
+	2. start minikube with VMBox.
+	
+	 > minikube start --driver=virtualbox
+
+     Note : run any one cammand either docker or virtualbox.
+	 
+6. to test minikube installed in your system, use any kubectl cammand from powersell or cmd.
+
+
+
+Kubernates Commands :
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: testpod4
+spec:
+  containers:
+    - name: c00
+      image: httpd
+      ports:
+       - containerPort: 80
+
+1. kubectl apply -f <file_name>.yaml  : execute .yaml file and create pod based on defind objects
+2. kubectl get pods : use to get all pods
+3. kubectl get pods -o wide : give details about where pod got created or on which instance pod got created and running.
+
+    o/p :
+	  NAME      READY   STATUS    RESTARTS   AGE     IP           NODE                                  NOMINATED NODE   READINESS GATES
+      testpod   1/1     Running   0          3m57s   10.244.0.3   minikube(here you will get node ip)   <none>           <none>
+	  
+4. 
+ => give details about pod and also whats are the container created.
+o/p : 
+Name:             testpod
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             minikube/192.168.49.2
+Start Time:       Thu, 13 Jul 2023 14:49:30 +0530
+Labels:           <none>
+Annotations:      <none>
+Status:           Running
+IP:               10.244.0.3
+IPs:
+  IP:  10.244.0.3
+Containers:
+  c00:
+    Container ID:  docker://6c2b8e2da8be7baa0bcfc6f4b1d53c9d477fb5395c16fb53c55489550180b302
+    Image:         ubuntu
+    Image ID:      docker-pullable://ubuntu@sha256:0bced47fffa3361afa981854fcabcd4577cd43cebbb808cea2b1f33a3dd7f508
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /bin/bash
+      -c
+      while true; do echo Hello-Bhupinder; sleep 5 ; done
+    State:          Running
+      Started:      Thu, 13 Jul 2023 14:49:52 +0530
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-2sfdk (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  kube-api-access-2sfdk:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  4m19s  default-scheduler  Successfully assigned default/testpod to minikube
+  Normal  Pulling    4m15s  kubelet            Pulling image "ubuntu"
+  Normal  Pulled     3m57s  kubelet            Successfully pulled image "ubuntu" in 17.9984318s (17.9985187s including waiting)
+  Normal  Created    3m57s  kubelet            Created container c00
+  Normal  Started    3m56s  kubelet            Started container c00
+  
+5. kubectl logs -f <pod_name> : giving log about pod container or details about pod container.(this is for only one container present inside pod)
+
+Ex :
+
+c:\minicobe> kubectl logs -f testpod
+O/P :
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+ 
+ 
+6. kubectl logs -f <pod_name> -c <container_name> : giving log about pod container or details about pod container.(this is for multiple container present inside pod)
+Ex:
+
+c:\minicobe> kubectl logs -f testpod -c c00
+O/P :
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+Hello-Bhupinder
+
+7. kubectl delete -f <file_name>.yml or kubectl delete pods <pod_name> : delete the pod
+
+8. kubectl exec <pod_name> -it -c <container_name> -- /bin/bash  => go inside particuler container.
+
+  Ex > kubectl exec testpod -it -c c01 -- /bin/bash
+  
+  
+9. kubectl get pods -- show -labels : give pods with lables.
+
+10. kubectl label pods <pod_name> <key>=<value> : if we want to add label to an existing object
+
+   where key is label key and value is label value.
+   Label we can add on pod, node and namespace.
+   
+11. get pods based on lables :
+
+  > kubectl get pods -l <key>=<value>
+  
+  where key is label key and value is label value.
+
+  Ex. >kubectl get pods -l env=develepment  
+  
+12. kubectl scale --replica=8 rc -l name=ashish  => use to scale up or scale down.
+
+here rc means replica controller
+
+13. kubectl describe deply <deplyment_pod_name> : check details about deploy.
+14. kubectl scale --replica=8 deploy <deplyment_pod_name> : scale up or down deployment object.
+
+
+15. kubectl rollout status deployment <deployment_pod_name> : give current version of rollout
+16. kubectl rollout history deployment <deployment_pod_name> : give no of version(no of times updates on deplyment file)
+17. kubectl rollout undo deployment <deployment_pod_name> : go to previous version.
+
+NameSpaces : namespace is just like virtual cluster or seperate folder.
+
+stept to create namespace :
+
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: mynamespace  => here we can give name to our namespace
+   labels:
+     name: mynamespace => here we can give lable to our namespace
+	 
+	 
+=> if you want to create pods inside namespace then follow below steps :
+
+  1. create namespace like above.
+  2. create yml file for pod.
+  3. run below cammands:
+      => kubectl apply -f <pod_file>.yaml -n <namesoace_name>
+	  Ex. > kubectl apply -f mypod.yaml -n mynamespace
+	  
+   4. check pod created inside namespace :
+   
+      > kubectl get pods -n mynamespace
+	  here mynamespace is the namespace name.
+	  
+Note : bydefault when run "kubectl get pods" then it search in default namespace.
+so if you want to search your pods in your namespace not in default namespace then for that run below cammans :
+
+   > kubectl config set-context $(kubectl config current-context) --namespace=dev
+   
+ => if you want to check your pod is there in which names space then run belwo command :
+     > kubectl config view | grep namespace:s:
+ 
+ 
+ 18. kubectl get <name_of_service> => gives all running services.
+ Note : here name_of_service can be pod, replicaSet, deployment, service, configMap
+ 
+  Ex. kubectl get deployment
+      kubelet get service
+ 
+ 19. kubectl get <name_of_service> <deplyed_service_name> -o yaml => you will get yaml file of <deplyed_service_name> service.
+ 
+ here name_of_service can be pod, replicaSet, deployment, service, configMap etc for which you want to generate yaml file.
+ 
+ Ex. kubectl get deployment currency-conversion-deplyment -o yaml
+     kubectl get service currency-conversion-service -o yaml
+	 kubectl get configMap currency-conversion-configmap -o yaml
+ 
+ <deplyed_service_name> service will you will get from "kubectl get deployment" cammands
+ 
+ 20. watch <culr> : it will send culr cammands every 2 sec.
+ 
+ Steps to check log of container running insed pod :
+ 
+  1. kubectl get pods 
+     you will get all running pod.
+	 
+  2. kubectl logs -f <pod_name>
+  
+ 21. check how many time application got deployed or get all depl version name.:
+ 
+   > kubectl rollout history deployment <deployment_name>
+   
+ 22. kubectl diif -f deployment.yaml 
+   above cammand compare this(deployment.yaml) yaml file with previous deplyed deployment.yaml file.
+   
+ 23 . cammand to undo change sin deployment.yaml file.
+ 
+   > kubectl rollout undo deployment <deployment_name> --to-revision=<version>
+   <version> you will get from from "kubectl rollout history deployment <deployment_name>" cammand
+        
+	
+	
+Step to troubleshoot kubernetes :
+
+=> Use describe(kubectl describe pod <pod_name>) cammand, if you did not get enough info then use "kubectl log -f <pod_name>"
