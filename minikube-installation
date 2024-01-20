@@ -42,6 +42,9 @@ Steps to install minikube :
 
 
 Kubernates Commands :
+Create First Pod:
+
+first-pod.yml:
 
 kind: Pod
 apiVersion: v1
@@ -59,7 +62,7 @@ spec:
 3. kubectl get pods -o wide : give details about where pod got created or on which instance pod got created and running.
 
     o/p :
-	  NAME      READY   STATUS    RESTARTS   AGE     IP           NODE                                  NOMINATED NODE   READINESS GATES
+      NAME      READY   STATUS    RESTARTS   AGE     IP           NODE                                  NOMINATED NODE   READINESS GATES
       testpod   1/1     Running   0          3m57s   10.244.0.3   minikube(here you will get node ip)   <none>           <none>
 	  
 4. 
