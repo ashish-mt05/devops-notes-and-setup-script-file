@@ -54,7 +54,7 @@ spec:
       ports:
        - containerPort: 80
 
-1. kubectl apply -f <file_name>.yaml  : execute .yaml file and create pod based on defind objects
+1. kubectl apply -f <file_name>.yaml or kubectl create -f <file_name>.yaml : execute .yaml file and create pod based on defind objects
 2. kubectl get pods : use to get all pods
 3. kubectl get pods -o wide : give details about where pod got created or on which instance pod got created and running.
 
