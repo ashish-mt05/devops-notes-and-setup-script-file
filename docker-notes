@@ -696,9 +696,9 @@ docker swarm join-token manager : to regenerate the token(if you forgot the toke
 
 
 Note: 
-=>To join the manager node on cluster, worker need to use previous token.
+=>To join the manager node on cluster worker need to use previous token.
 =>we can't delete running worker node directly
-=>if you want then first we need to stop and then delete it.
+=>if you want to remove then first we need to stop and then delete it.
 
 
 HISTORY:
@@ -763,11 +763,15 @@ public-ip of swamr master:9000
 
 
 DOCKER NETWORKING:
-Docker networks are used to make a communication between the multiple containers that are running on same or different docker hosts. We have different types of docker networks.
+Docker networks are used to make a communication between the multiple containers that are running on same or different docker hosts. 
+
+We have different types of docker networks.
 Bridge Network
 Host Network
 None network
 Overlay network
+
+Type of netwrok:
 
 BRIDGE NETWORK: It is a default network that container will communicate with each other within the same host.
 
@@ -778,14 +782,26 @@ NONE NETWORK: When you don’t Want The container to get exposed to the world, w
 OVERLAY NETWORK: Used to communicate containers with each other across the multiple docker hosts.
 
 
-To create a network: docker network create network_name
-To see the list: docker network ls
-To delete a network: docker network rm network_name
-To inspect: docker network inspect network_name
-To connect a container to the network: docker network connect network_name container_id/name
-apt install iputils-ping -y : command to install ping checks
-To disconnect from the container: docker network disconnect network_name container_name
-To prune: docker network prune
+To create a network: 
+ > docker network create network_name
+Create network with network type :
+ > docker netwrok create --driver <network_type> <network_name>
+ Ex:  
+To see the list: 
+ > docker network ls
+To delete a network: 
+ > docker network rm network_name
+To inspect: 
+ > docker network inspect network_name
+To connect a container to the network: 
+ > docker network connect network_name container_id/name
+ > docker run --name <container_name> --network <network_name> <image_name>
+apt install iputils-ping -y : 
+ > command to install ping checks
+To disconnect from the container: 
+ > docker network disconnect network_name container_name
+To prune: 
+ > docker network prune
 
 
 RESOURCE MANAGEMENT:
