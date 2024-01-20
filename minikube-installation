@@ -37,9 +37,18 @@ Steps to install minikube :
 
      Note : run any one cammand either docker or virtualbox.
 	 
-6. to test minikube installed in your system, use any kubectl cammand from powersell or cmd.
+6. check minikube status:
+     > minikube status
+    o/p:
+      minikube
+      type: Control Plane
+      host: Running
+      kubelet: Running
+      apiserver: Running
+      kubeconfig: Configured
 
-
+      here check status of kubectl and kubeconfig.
+      if running then installation is completed.
 
 Kubernates Commands :
 Create First Pod:
