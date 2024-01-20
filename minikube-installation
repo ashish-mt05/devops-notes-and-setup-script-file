@@ -29,11 +29,11 @@ Steps to install minikube :
 
     1. start minikube with docker.
 	
-	 > minikube start --driver=docker
+	> minikube start --driver=docker
 	 
-	2. start minikube with VMBox.
+    2. start minikube with VMBox.
 	
-	 > minikube start --driver=virtualbox
+	> minikube start --driver=virtualbox
 
      Note : run any one cammand either docker or virtualbox.
 	 
