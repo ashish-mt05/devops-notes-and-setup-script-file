@@ -1,0 +1,74 @@
+CIDR:
+
+video link : https://www.youtube.com/watch?v=N-ywmOpWehE
+
+Class in IP address :
+
+ip4 denoted by 32 bit
+
+8.8.8.8 ==> 00000000.00000000.00000000.00000000
+
+here 8 demote no of bit.
+
+There are total 5classes there.
+1. A class (N.H.H.H) ==> no of host = 24 power of 2==> range = 1.0.0.0 to 127.0.0.0  
+2. B class (N.N.H.H) ==> no of host = 16 power of 2==> range = 128.0.0.0 to 191.255.0.0
+3. C class (N.N.N.H) ==> no of host = 8 power of 2==> range = 192.0.0.0 to 223.255.255.0
+4. D class
+5. E class
+
+where 
+ N denote Network
+ H denote Host
+
+so ip address decide based on number of host = power of 2.
+
+
+
+Classless Inter-Domain Routing(CIDR):
+
+Classless Inter-Domain Routing (CIDR) is an IP address allocation method that improves data routing efficiency 
+on the internet. Every machine, server, and end-user device that connects to the internet has a unique number, 
+called an IP address, associated with it.
+
+It is denoted by : a.b.c.d/n
+where n is the no of 1(network)
+
+length of ip4 s 32 bit.
+
+so no of host = 32 - n
+total no of host = n power of 2.
+
+How to calculate network id/block id of 200.10.20.40/28
+
+Sol: here 28 denotes total number of 1 in network.
+     200.10.20.00101000 
+     in this except 28 bit from left to right make every other bit 0
+     200.10.20.00100000 
+     now convert this ip into decimal : 200.10.20.32/28 is the network id or block id(this is also fisrt ip of block)
+     
+     host bit = 32 -28
+     size of block = total number of host = (host bit) power of 2 = (4) power of 2 = 16
+     no of host means = total ip possible to distribute.
+
+
+Rule:
+
+1. address should be contiguous.
+   ex : 200.10.20.32
+                 .33
+                 .34
+                 .35
+                  etc
+
+2. No of ip address must be power of 2.
+   so here "total no host = no of ip address" is 16, and 16 is power of 2.
+
+3. Fisrt ip address of every block must be divisible by block size.
+
+   => network id or block id is the first ip address of every block, which is divisible by 16(block size)
+
+
+
+     
+
